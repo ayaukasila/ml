@@ -1,4 +1,3 @@
-# train.py - Обучение модели и сохранение
 
 import pandas as pd
 import numpy as np
@@ -18,14 +17,13 @@ import nltk
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-# === ШАГ 1: Загрузка данных ===
-print('Загрузка данных...')
+print('Загрузка данных')
 data = pd.read_csv('train.csv')
 print('Данные успешно загружены:')
 print(data.head())
 
-# === ШАГ 2: Предобработка данных ===
-print('Предобработка данных...')
+
+print('Предобработка данных')
 
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
@@ -42,47 +40,40 @@ def clean_text(text):
 data['text'] = data['title'] + ' ' + data['author'].fillna('') + ' ' + data['text'].fillna('')
 data['text'] = data['text'].apply(clean_text)
 
-# Удаляем пропуски
+
 data = data.dropna()
 
-# Векторизация текста
-print('Векторизация текста...')
+print('Векторизация текста')
 vectorizer = TfidfVectorizer(max_features=30000, ngram_range=(1, 3), min_df=5, max_df=0.85)
 X = vectorizer.fit_transform(data['text']).toarray()
 y = data['label']
 
-# === ШАГ 3: Преобразование меток ===
-print('Преобразование меток...')
+print('Преобразование меток')
 le = LabelEncoder()
 y = le.fit_transform(y)
 
-# Проверка баланса классов
 print("Количество фейковых новостей:", sum(y == 0))
 print("Количество настоящих новостей:", sum(y == 1))
 
-# === ШАГ 4: Разделение данных ===
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# === ШАГ 5: Обучение модели ===
 print('Обучение модели (LogisticRegression)...')
 model = LogisticRegression(max_iter=1000, solver='lbfgs')
 
-# Кросс-валидация
-print('Кросс-валидация модели...')
+print('Кросс-валидация модели')
 scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
 print('Результаты кросс-валидации:', scores)
 print('Средняя точность на кросс-валидации:', scores.mean())
 
 model.fit(X_train, y_train)
 
-# === ШАГ 6: Оценка модели ===
-print('Оценка модели...')
+print('Оценка модели')
 y_pred = model.predict(X_test)
 print('Accuracy:', accuracy_score(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
-# === ШАГ 7: Построение WordCloud ===
-print('Построение WordCloud...')
+
+print('Построение WordCloud')
 fake_data = data[data['label'] == 0]
 real_data = data[data['label'] == 1]
 
@@ -102,8 +93,7 @@ plt.axis('off')
 
 plt.show()
 
-# === ШАГ 8: Сохранение модели ===
-print('Сохранение модели с помощью pickle...')
+print('Сохранение модели')
 with open('model.pkl', 'wb') as f:
     pickle.dump(model, f)
 

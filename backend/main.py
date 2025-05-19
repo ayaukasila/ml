@@ -10,13 +10,12 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Загрузка модели и TF-IDF векторизатора
 model = joblib.load("model.pkl")
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
 
 df = pd.read_csv("train.csv")
 total_articles = len(df)
-# Берём 3 примера для списка
+
 examples = df['text'].dropna().sample(n=3, random_state=42).tolist()
 
 @app.get("/")
